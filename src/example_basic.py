@@ -50,10 +50,10 @@ def get_key_style(deck, key, state):
         font = "Roboto-Regular.ttf"
         label = "Bye" if state else "Exit"
     else:
-        name = "emoji"
+        name = "emoji"                                                      
         icon = "{}.png".format("Pressed" if state else "Released")
         font = "Roboto-Regular.ttf"
-        label = "Pressed!" if state else "Key {}".format(key)
+        label = "Outch!" if state else "Key {}".format(key)
 
     return {
         "name": name,
