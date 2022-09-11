@@ -21,6 +21,7 @@ from StreamDeck.ImageHelpers import PILHelper
 # Folder location of image assets used by this example.
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), "Assets")
 
+#typos = 'HalvarEng-Bd.ttf', 'HalvarEng-Bd.ttf'
 
 # Generates an image that is correctly sized to fit across all keys of a given
 # StreamDeck.
@@ -92,40 +93,39 @@ def crop_key_image_from_deck_sized_image(deck,
     # larger image.
     key_image = PILHelper.create_image(deck)
     key_image.paste(segment)
-    #key_image.show()
 
-    return PILHelper.to_native_format(deck, key_image)
+   # return PILHelper.to_native_format(deck, key_image)
+    return key_image
+
 
 # Generates a custom tile with run-time generated text and custom image via the
 # PIL module.
 def render_key_image(deck,
                      icon_filename = "{}.png".format("Exit"),
-                     font_filename = 'Roboto-Regular.ttf', 
-                     label_text = 'DEFAULT'):
+                     font_filename = 'HalvarEng-Bd.ttf', 
+                     label_text = 'DEFAULT'
+                     ):
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
     
     icon_filename = os.path.join(ASSETS_PATH, icon_filename)
-    font_filename = os.path.join(ASSETS_PATH, font_filename)
-    
+
     icon = Image.open(icon_filename)
-    image = PILHelper.create_scaled_image(deck, icon, margins=[0, 0, 20, 0])
+    image = PILHelper.create_scaled_image(deck, icon, margins=[0, 0, 0, 0])
 
-    # Load a custom TrueType font and use it to overlay the key index, draw key
-    # label onto the image a few pixels from the bottom of the key.
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(font_filename, 14)
-    draw.text((image.width / 2, image.height - 5), text=label_text, font=font, anchor="ms", fill="white")
 
-    return PILHelper.to_native_format(deck, image)
+    return image
+
 
 # Generates a custom tile with run-time generated text and custom image via the
 # PIL module.
 def render_key_text(deck,
                     icon_filename = "{}.png".format("Solid_black"),  
-                    font_filename = 'Roboto-Regular.ttf', 
-                    label_text = 'DEFAULT'):
+                    font_filename = 'HalvarEng-Bd.ttf', 
+                    label_text = 'DEFAULT',
+                    fill = 'white',
+                    font_size = 28):
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
@@ -139,43 +139,110 @@ def render_key_text(deck,
     # Load a custom TrueType font and use it to overlay the key index, draw key
     # label onto the image a few pixels from the bottom of the key.
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(font_filename, 15)
-    draw.text((image.width / 2, image.width / 2), text=label_text, font=font, anchor="ms", fill="white")
+    font = ImageFont.truetype(font_filename, font_size)
+    draw.text((3, image.height / 2 ), 
+              text=label_text, 
+              font=font,
+              anchor="lm",
+              fill=fill)
+   # return PILHelper.to_native_format(deck, image)
+    return image
 
-    return PILHelper.to_native_format(deck, image)
 
-# Generates a custom tile with run-time generated text and custom image via the
+# Takes an exisiting key and adds run-time generated text via the
 # PIL module.
 def render_text_over_image(deck,
                            existing_key_image,  
-                           font_filename = 'Roboto-Regular.ttf', 
-                           label_text = 'DEFAULT'):
+                           font_filename = 'HalvarEng-Bd.ttf', 
+                           label_text = 'DEFAULT',
+                           fill = 'white',
+                           font_size = 28):
     # Resize the source image asset to best-fit the dimensions of a single key,
     # leaving a margin at the bottom so that we can draw the key title
     # afterwards.
     
     font_filename = os.path.join(ASSETS_PATH, font_filename)
     
-    image = PILHelper.create_scaled_image(deck, existing_key_image)
+    #image = PILHelper.create_scaled_image(deck, existing_key_image)
 
     # Load a custom TrueType font and use it to overlay the key index, draw key
     # label onto the image a few pixels from the bottom of the key.
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(font_filename, 15)
-    draw.text((existing_key_image.width / 2, existing_key_image.width / 2), text=label_text, font=font, anchor="ms", fill="white")
+    draw = ImageDraw.Draw(existing_key_image)
+    font = ImageFont.truetype(font_filename, font_size)
+    draw.text((3, existing_key_image.height / 2 ), 
+              text=label_text, 
+              font=font,
+              anchor="lm",
+              fill=fill)
 
-    return PILHelper.to_native_format(deck, image)
+    #return PILHelper.to_native_format(deck, image)
+    return existing_key_image
 
-# Closes the StreamDeck device on key state change.
-def key_change_callback(deck, key, state):
+# Returns styling information for a key based on its position and state.
+def get_key_style(deck, key, state):
+    #First button in the application is the back button
+    back_key_index = 0
+    
+    # Last button in the example application is the exit button.
+    exit_key_index = deck.key_count() - 1
+
+    if key == back_key_index:
+        name = "back"
+        icon = "{}.png".format("Back_filled")
+        font = "HalvarEng-Bd.ttf"
+        label = "Bye" if state else "Exit"
+        
+    elif key == exit_key_index:
+        name = "exit"
+        icon = "{}.png".format("Exit")
+        font = "Roboto-Regular.ttf"
+        label = "Bye" if state else "Exit"
+    else:
+        name = "emoji"                                                      
+        icon = "{}.png".format("Pressed" if state else "Released")
+        font = "Roboto-Regular.ttf"
+        label = "Outch!" if state else "Key {}".format(key)
+
+    return {
+        "name": name,
+        "icon": os.path.join(ASSETS_PATH, icon),
+        "font": os.path.join(ASSETS_PATH, font),
+        "label": label
+    }
+
+def update_key_image(deck, key, state):
+    # Determine what icon and label to use on the generated key.
+    key_style = get_key_style(deck, key, state)
+
+    # Generate the custom key with the requested image and label.
+    image = render_key_image(deck, key_style["icon"], key_style["font"], key_style["label"])
+    image = PILHelper.to_native_format(deck, image)
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     with deck:
-        # Reset deck, clearing all button images.
-        deck.reset()
+        # Update requested key with the generated image.
+        deck.set_key_image(key, image)
 
-        # Close deck handle, terminating internal worker threads.
-        deck.close()
+# Closes the StreamDeck device on key state change.
+def key_change_callback(deck, key, state):
+    # Print new key state
+    print("Deck {} Key {} = {}".format(deck.id(), key, state), flush=True)
+    
+    # Update the key image based on the new key state.
+    update_key_image(deck, key, state)
+        
+    #with deck:
+        # Update requested key with the generated image.
+        #deck.set_key_image(key, image)
+
+    # Use a scoped-with on the deck to ensure we're the only thread using it
+    # right now.
+#    with deck:
+        # Reset deck, clearing all button images.
+#        deck.reset()
+#
+#        # Close deck handle, terminating internal worker threads.
+#        deck.close()
 
 
 if __name__ == "__main__":
@@ -205,8 +272,8 @@ if __name__ == "__main__":
         # StreamDeck.
         image_0 = create_partial_deck_sized_image(deck, key_spacing, "Alternator.png")
         image_1 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_right_white_small.png")
-        image_2 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_square_white.png")
-        image_3 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_square_white_small.png")
+        image_2 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_real_squared.png")
+        image_3 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_icon_black.png")
 
         #print("Created sub image in size of {}x{} pixels.".format(image.width, image.height))
 
@@ -224,18 +291,37 @@ if __name__ == "__main__":
             # LEFT MENU
             if k == 0:
                 # Generate the custom key with the requested image and label.
-                key_images[k] = render_key_image(deck, "{}.png".format("Back_white"))
+                key_images[k] = render_key_image(deck, 
+                                                 "{}.png".format("Back_filled"))
             if k == 8:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
-                                                 "{}.png".format("Up_filled"), 
-                                                 label_text = 'UP')
+                                                 "{}.png".format("Up_filled"))
             if k == 16:
                 # Generate the custom key with the requested image and label.
-                key_images[k] = render_key_image(deck, "{}.png".format("Down"))
+                key_images[k] = render_key_image(deck,
+                                                 "{}.png".format("Down_filled"))
             if k == 24:
                 # Generate the custom key with the requested image and label.
-                key_images[k] = render_key_text(deck)
+                key_images[k] = render_key_text(deck,
+                                                label_text = 'PICK\nPRODUCT\nGROUP')
+                
+            # RIGHT MENU
+            if k == 7:
+                # Generate the custom key with the requested image and label.
+                key_images[k] = render_key_image(deck, 
+                                                 "{}.png".format("Forward_filled"))
+            if k == 15:
+                # Generate the custom key with the requested image and label.
+                key_images[k] = render_key_image(deck, 
+                                                 "{}.png".format("Up_filled"))
+            if k == 23:
+                # Generate the custom key with the requested image and label.
+                key_images[k] = render_key_image(deck, 
+                                                 "{}.png".format("Down_filled"))
+            if k == 31:
+                # Generate the custom key with the requested image and label.
+                key_images[k] = render_key_text(deck,label_text = 'EIBA')
             
             # OPTIONS PANE
             
@@ -244,19 +330,63 @@ if __name__ == "__main__":
                 
                 if k == 1:
                     # Generate the custom key with the requested image and label.
-                    key_images[k] = render_text_over_image(deck, key_images[k], label_text = 'ALTERNATOR')
-                    
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k],
+                                                           label_text = 'ALTER\nNATOR',
+                                                           fill = 'black')  
+                  
 
             if k == 4 or k == 5 or k == 6 or k == 12 or k == 13 or k == 14:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_1, key_spacing, k, 0, 4)
                 
+                if k == 4:
+                    # Generate the custom key with the requested image and label.
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k],
+                                                           label_text = 'ALTER\nNATOR',
+                                                           fill = 'white')
+                if k == 12:
+                    # Generate the custom key with the requested image and label.
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k], 
+                                                           label_text = '',
+                                                           fill = 'white')
+
+                
             if k == 17 or k == 18 or k == 19 or k == 25 or k == 26 or k == 27:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_2, key_spacing, k, 2, 1)
+                
+                if k == 17:
+                    # Generate the custom key with the requested image and label.
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k],
+                                                           label_text = 'ALTER\nNATOR',
+                                                           fill = 'black')
+                if k == 25:
+                    # Generate the custom key with the requested image and label.
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k], 
+                                                           label_text = '',
+                                                           fill = 'black')
 
             if k == 20 or k == 21 or k == 22 or k == 28 or k == 29 or k == 30:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_3, key_spacing, k, 2, 4)
                 
+                if k == 20:
+                    # Generate the custom key with the requested image and label.
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k], 
+                                                           label_text = 'ALTER\nNATOR',
+                                                           fill = 'black')
+                if k == 28:
+                    # Generate the custom key with the requested image and label.
+                    key_images[k] = render_text_over_image(deck, 
+                                                           key_images[k], 
+                                                           label_text = '',
+                                                           fill = 'white')
                 
+            
+            key_images[k] = PILHelper.to_native_format(deck, key_images[k])
         # Use a scoped-with on the deck to ensure we're the only thread
         # using it right now.
         with deck:
@@ -280,6 +410,28 @@ if __name__ == "__main__":
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
                 if k == 24:
+                    key_image = key_images[k]
+                
+                    # Show the section of the main image onto the key.
+                    deck.set_key_image(k, key_image)
+                
+                # LEFT MENU
+                if k == 7:
+                    key_image = key_images[k]
+                
+                    # Show the section of the main image onto the key.
+                    deck.set_key_image(k, key_image)
+                if k == 15:
+                    key_image = key_images[k]
+                
+                    # Show the section of the main image onto the key.
+                    deck.set_key_image(k, key_image)                
+                if k == 23:
+                    key_image = key_images[k]
+                
+                    # Show the section of the main image onto the key.
+                    deck.set_key_image(k, key_image)
+                if k == 31:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
