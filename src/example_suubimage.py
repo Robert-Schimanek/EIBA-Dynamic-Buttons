@@ -320,7 +320,9 @@ if __name__ == "__main__":
         image_2 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_real_squared.png")
         image_3 = create_partial_deck_sized_image(deck, key_spacing, "Alternator_icon_black.png")
 
-        #print("Created sub image in size of {}x{} pixels.".format(image.width, image.height))
+
+
+        product_options = range()
 
         # Extract out the section of the image that is occupied by each key.
         key_images = dict()
