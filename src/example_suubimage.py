@@ -179,33 +179,77 @@ def render_text_over_image(deck,
     return existing_key_image
 
 # Returns styling information for a key based on its position and state.
-def get_key_style(deck, key, state):
-    #First button in the application is the back button
-    back_key_index = 0
-    
-    # Last button in the example application is the exit button.
-    exit_key_index = deck.key_count() - 1
+def get_key_style(deck, key, state, font = "HalvarEng-Bd.ttf"):
+
+
+    # LEFT MENU
 
     if key == back_key_index:
         name = "back"
         icon = "{}.png".format("Back_filled")
-        font = "HalvarEng-Bd.ttf"
-        label = "Bye" if state else "Exit"
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Bye" if state else "Back"
         
+    elif key == up_key_left_index:
+        name = "up_left"
+        icon = "{}.png".format("Up_filled")
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Uped" if state else "Up"
+    
+    elif key == down_key_left_index:
+        name = "down_left"
+        icon = "{}.png".format("Down_filled")
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Downed" if state else "Down"
+        if state:
+            print('Call_other_objects')
+    
+    elif key == call_to_action_key_left_index:
+        name = "call_to_action"
+        icon = "{}.png".format("Alternator_real_squared")
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Down" if state else "Down"
+        
+    elif key in tile_0_keys_index:
+        name = "first_option"
+        icon = "switch_blue"
+        icon_path = "draw_switch_blue"
+        label = "Down" if state else "Down"
+    
+    elif key in tile_1_keys_index:
+        name = "second_option"
+        icon = "switch_blue"
+        icon_path = "draw_switch_blue"
+        label = "Down" if state else "Down"
+    
+    elif key in tile_2_keys_index:
+        name = "third_option"
+        icon = "switch_blue"
+        icon_path = "draw_switch_blue"
+        label = "Down" if state else "Down"
+        
+    elif key in tile_3_keys_index:
+        name = "fourth_option"
+        icon = "switch_blue"
+        icon_path = "draw_switch_blue"
+        label = "Down" if state else "Down"
+    
     elif key == exit_key_index:
         name = "exit"
         icon = "{}.png".format("Exit")
-        font = "Roboto-Regular.ttf"
+        icon_path = os.path.join(ASSETS_PATH, icon)
         label = "Bye" if state else "Exit"
+        
     else:
         name = "emoji"                                                      
         icon = "{}.png".format("Pressed" if state else "Released")
-        font = "Roboto-Regular.ttf"
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        font = "HalvarEng-Bd.ttf"
         label = "Outch!" if state else "Key {}".format(key)
 
     return {
         "name": name,
-        "icon": os.path.join(ASSETS_PATH, icon),
+        "icon": icon_path,
         "font": os.path.join(ASSETS_PATH, font),
         "label": label
     }
@@ -213,7 +257,8 @@ def get_key_style(deck, key, state):
 def update_key_image(deck, key, state):
     # Determine what icon and label to use on the generated key.
     key_style = get_key_style(deck, key, state)
-
+    print(key_style)
+    
     # Generate the custom key with the requested image and label.
     image = render_key_image(deck, key_style["icon"], key_style["font"], key_style["label"])
     image = PILHelper.to_native_format(deck, image)
@@ -281,27 +326,50 @@ if __name__ == "__main__":
         key_images = dict()
         
         key_count = range(deck.key_count())
-        #key_count = [0,1,2,3,8,9,10,11]
-        #key_count = [1,2,3,4,9,10,11,12]
-        #key_count = [0,1,2,3,4,8,9,10,11,12]
+        
+        #LEFT MENU
+        
+        #First button in the application is the back button
+        back_key_index = 0
+        #8th button in the application is the up button left
+        up_key_left_index = 8 
+        #16th button in the application is the down button left
+        down_key_left_index = 16 
+        #16th button in the application is the up button left
+        call_to_action_key_left_index = 24 
+        
+        #FIRST TILE
+        tile_0_keys_index = [1,2,3,9,10,11]
+        
+        #SECOND TILE
+        tile_1_keys_index = [4,5,6,12,13,14]
+        
+        #THIRD TILE
+        tile_2_keys_index = [17,18,19,25,26,27]
+
+        #FOURTH TILE
+        tile_3_keys_index = [20,21,22,28,29,30]
+        
+        # Last button in the example application is the exit button.
+        exit_key_index = deck.key_count() - 1
         
         
         for k in key_count:
             
             # LEFT MENU
-            if k == 0:
+            if k == back_key_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Back_filled"))
-            if k == 8:
+            if k == up_key_left_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Up_filled"))
-            if k == 16:
+            if k == down_key_left_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck,
                                                  "{}.png".format("Down_filled"))
-            if k == 24:
+            if k == call_to_action_key_left_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_text(deck,
                                                 label_text = 'PICK\nPRODUCT\nGROUP')
@@ -325,7 +393,7 @@ if __name__ == "__main__":
             
             # OPTIONS PANE
             
-            if k == 1 or k == 2 or k == 3 or k == 9 or k == 10 or k == 11:
+            if k in tile_0_keys_index:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_0, key_spacing, k, 0, 1)
                 
                 if k == 1:
@@ -336,7 +404,7 @@ if __name__ == "__main__":
                                                            fill = 'black')  
                   
 
-            if k == 4 or k == 5 or k == 6 or k == 12 or k == 13 or k == 14:
+            if k in tile_1_keys_index:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_1, key_spacing, k, 0, 4)
                 
                 if k == 4:
@@ -353,7 +421,7 @@ if __name__ == "__main__":
                                                            fill = 'white')
 
                 
-            if k == 17 or k == 18 or k == 19 or k == 25 or k == 26 or k == 27:
+            if k in tile_2_keys_index:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_2, key_spacing, k, 2, 1)
                 
                 if k == 17:
@@ -369,7 +437,7 @@ if __name__ == "__main__":
                                                            label_text = '',
                                                            fill = 'black')
 
-            if k == 20 or k == 21 or k == 22 or k == 28 or k == 29 or k == 30:
+            if k in tile_3_keys_index:
                 key_images[k] = crop_key_image_from_deck_sized_image(deck, image_3, key_spacing, k, 2, 4)
                 
                 if k == 20:
