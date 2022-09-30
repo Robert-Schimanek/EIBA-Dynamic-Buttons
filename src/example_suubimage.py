@@ -7,12 +7,11 @@
 #         www.fourwalledcubicle.com
 #
 
-# Example script showing how to tile a larger image across multiple buttons, by
-# first generating an image suitable for the entire deck, then cropping out and
-# applying key-sized tiles to individual keys of a StreamDeck.
-
 import os
 import threading
+import json
+import requests
+
 
 from PIL import Image, ImageDraw, ImageOps, ImageFont
 from StreamDeck.DeviceManager import DeviceManager
@@ -510,13 +509,35 @@ if __name__ == "__main__":
         key_spacing = (36, 36)
 
         # import of the BDE Status response for display of results
-        import json
-        response_location = os.path.join(ASSETS_PATH, "response.json")
-        f = open(response_location)
-        response = json.load(f)
+        session_key = "piwZSNqplNO0K2kbBkQB"
+        
+        x = requests.get('http://localhost:5100/bde/selection/evaluation/status/' + session_key)
+
+
+
+        print(x.status_code)
+        
+        
+        print(x.text)
+        
+        #print(x.json()["product_group_prediction_list"])
+        
+        if x.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!':
+            print( x.json()["product_group_prediction_list"]["predictions"])
+            response = x.json()
+        #err
+        
+        #response_location = os.path.join(ASSETS_PATH, "response.json")
+        #f = open(response_location)
+        #response = json.load(f)
         
 
-        result_length = len(response['oen_prediction_list']['predictions']) 
+        result_length = len(response['product_group_prediction_list']['predictions']) 
+        
+        print(result_length, "this is the result length")
+        
+        err
+        
         knwon_product_groups_num = 12
         tile_count = 4
         page = 0
