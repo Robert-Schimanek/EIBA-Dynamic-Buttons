@@ -7,6 +7,12 @@
 #         www.fourwalledcubicle.com
 #
 
+# Stream Deck XL has key size of 144 x 144 pixel
+# spacing between keys is considered as 36 pixel
+# a 3 x 2 image has (144 * 3) + (2 * 36) = 504
+#  (144 * 2) + (1 * 36) = 324
+
+import time
 import os
 import threading
 import json
@@ -19,7 +25,6 @@ from StreamDeck.ImageHelpers import PILHelper
 
 # Folder location of image assets used by this example.
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), "Assets")
-
 #typos = 'HalvarEng-Bd.ttf', 'HalvarEng-Bd.ttf'
 
 # Generates an image that is correctly sized to fit across all keys of a given
@@ -180,7 +185,137 @@ def render_text_over_image(deck,
 # Returns style information about display of certain product groups
 def get_product_group_info(response, iterator = 0, product_group = 'Alternator'):
     
+    product_group = response['product_group_prediction_list']['predictions'][iterator]['product_group']
+    
+    print(product_group)
+    
+    # ID
+    if product_group == 'Alternator': # aka 'Alternator'
+        image_file_name = "Alternator_real_squared.png"
+        label_text = "ALTER\nNATOR"
+        fill = 'black'
+    
+    # ID  
+    elif product_group == 'Starter': #'Starter':
+        image_file_name = "Starter_StreamDeck_XL.png"
+        label_text = "STARTER"
+        fill = 'black'
+    
+    # ID
+    elif product_group == 'CommonRailInjector': #'CommonRailInjector':
+        image_file_name = "CommonRailInjector_StreamDeck_XL.png"
+        label_text = "COMMON\nRAIL\nINJECTOR"
+        fill = 'black'
+    
+    # ID
+    elif product_group == 'DieselInjector': #'DieselInjector':
+        image_file_name = "DieselInjector_StreamDeck_XL.png"
+        label_text = "DIESEL\nINJECTOR"
+        fill = 'black'
+    
+    elif product_group == 'CommonRailHighPressurePump': #'CommonRailHighPressurePump':
+        image_file_name = "CommonRailHighPressurePump_StreamDeck_XL.png"
+        label_text = "COMMON\nRAIL\nHIGH\nPRESSURE\nPUMP"
+        fill = 'black'
+    
+    elif product_group == 'BrakeCaliper': #'BrakeCaliper':
+        image_file_name = "brake-caliper.png"
+        label_text = "BRAKE\nCALIPER"
+        fill = 'black'
+    
+    elif product_group == 'ClutchDisc': #'ClutchDisc':
+        image_file_name = "clutch-disc.png"
+        label_text = "CLUTCH\nDISC"
+        fill = 'black'
+    
+    elif product_group == 'UnitInjector': #'UnitInjector':
+        image_file_name = "diesel-injector.jpg"
+        label_text = "UNIT\nINJECTOR"
+        fill = 'black'
+    
+    elif product_group == 'Compressor': #'Compressor':
+        image_file_name = "Alternator_right_white_small.png"
+        label_text = "COM\nPRESSOR"
+        fill = 'black'
+    
+    elif product_group == 'Injectionpump': #'InjectionPump':
+        image_file_name = "InjectionPump_StreamDeck_XL.png"
+        label_text = "INJECT\nION\nPUMP"
+        fill = 'black'
+        
+    elif product_group == 'PSG5-Set': #'PSG5-Set':
+        image_file_name = "PSG5-Set_StreamDeck_XL.png"
+        label_text = "PSG5\nSET"
+        fill = 'black'
+        
+    elif product_group == 'steeringCV': #'PSG5-Set':
+        image_file_name = "SteeringCV_StreamDeck_XL.png"
+        label_text = "STEERING\nCV"
+        fill = 'black'
+    
+    elif product_group == 'Ignitiondistributor': #'PSG5-Set':
+        image_file_name = "Ignitiondistributor_StreamDeck_XL.png"
+        label_text = "IGNITION\nDISTRIBUTOR"
+        fill = 'black'
+    
+    elif product_group == 'Steeringpump': #'PSG5-Set':
+        image_file_name = "Steeringpump_StreamDeck_XL.png"
+        label_text = "STEERING\nPUMP"
+        fill = 'black'
+
+    elif product_group == 'hydraulicsteering': #'PSG5-Set':
+        image_file_name = "Hydraulicsteering_StreamDeck_XL.png"
+        label_text = "HYDRAULIC\nSTEERING"
+        fill = 'black'
+    
+    elif product_group == 'UnitPump': #'PSG5-Set':
+        image_file_name = "Unitpump_StreamDeck_XL.png"
+        label_text = "UNIT\nPUMP"
+        fill = 'black'
+    
+    elif product_group == 'electronicsteering': #'PSG5-Set':
+        image_file_name = "Electronicsteering_StreamDeck_XL.png"
+        label_text = "ELECTRONIC\nSTEERING"
+        fill = 'black'
+        
+    elif product_group == 'ECU': #'PSG5-Set':
+        image_file_name = "ECU_StreamDeck_XL.png"
+        label_text = "ECU"
+        fill = 'black'
+               
+    elif product_group == 'Electricpump': #'PSG5-Set':
+        image_file_name = "Electricpump_StreamDeck_XL.png"
+        label_text = "ELECTRIC\nPUMP"
+        fill = 'black'
+        
+    elif product_group == 'DNOX2': #'PSG5-Set':
+        image_file_name = "DNOX2_StreamDeck_XL.png"
+        label_text = "DNOX2"
+        fill = 'black'
+            
+    elif product_group == 'OtherProduct': #'OtherProduct':
+        image_file_name = "Alternator.png"
+        label_text = "OTHER\nPRODUCT"
+        fill = 'white'
+            
+    else:
+        image_file_name = "Alternator.png"
+        label_text = "FALSE"
+        fill = 'white'
+        
+    return {
+        "label_text": label_text,
+        "fill": fill,
+        "image_file": os.path.join(ASSETS_PATH, image_file_name),
+        "image_file_name": image_file_name
+        }
+
+# Returns style information about display of certain product groups
+def get_oen_info(response, iterator = 0):
+    
     product_group = response['oen_prediction_list']['predictions'][iterator]['oen']
+    
+    print(product_group)
 
     if product_group == '0445110369': # aka 'Alternator'
         image_file_name = "Alternator.png"
@@ -241,8 +376,6 @@ def get_product_group_info(response, iterator = 0, product_group = 'Alternator')
         image_file_name = "Alternator.png"
         label_text = "FALSE"
         fill = 'white'
-        
-    #image_file_name = "clutch-disc.png"
     
     return {
         "label_text": label_text,
@@ -250,6 +383,7 @@ def get_product_group_info(response, iterator = 0, product_group = 'Alternator')
         "image_file": os.path.join(ASSETS_PATH, image_file_name),
         "image_file_name": image_file_name
         }
+
 
 # Returns styling information for a key based on its position and state.
 def get_key_style(deck, key, state, font = "HalvarEng-Bd.ttf", action = "None"):
@@ -362,12 +496,14 @@ def update_key_image(deck, key, state):
             change_page(-1)
             
         display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
+        print(display_order)
         
         for k in tile_keys:
-            key_images[k] = get_key_image_for_pane(k, response, display_order)
+            # key_images[k] = get_key_image_for_pane(k, response, display_order)
+            key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
 
             with deck:
-                key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
+                #key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
                 deck.set_key_image(k, key_images[k])
               
     with deck:
@@ -472,9 +608,9 @@ def get_key_image_for_pane(k, response, display_order_loc):
         if k == 20:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
-                                                   key_image,
-                                                   label_text = product_group_info['label_text'],
-                                                   fill = product_group_info['fill'])
+                                                key_image,
+                                                label_text = product_group_info['label_text'],
+                                                fill = product_group_info['fill'])
         elif k == 28:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
@@ -484,6 +620,136 @@ def get_key_image_for_pane(k, response, display_order_loc):
             
 
     return key_image
+
+def get_key_image_for_pane_new(k, response, display_order_loc, PG_key_images, PG_iterator_dict):
+    
+    if k in tile_0_keys_index:
+        product_group = response['product_group_prediction_list']['predictions'][display_order_loc[0]]['product_group']
+         
+    elif k in tile_1_keys_index:
+        product_group = response['product_group_prediction_list']['predictions'][display_order_loc[1]]['product_group']
+        
+    elif k in tile_2_keys_index:   
+        product_group = response['product_group_prediction_list']['predictions'][display_order_loc[2]]['product_group']
+
+    elif k in tile_3_keys_index:   
+        product_group = response['product_group_prediction_list']['predictions'][display_order_loc[3]]['product_group']
+
+    key_image = PG_key_images[PG_iterator_dict[product_group]][k]
+           
+    return key_image
+
+def init_key_image_for_all_pgs(response):
+    
+    responselength = len(response['product_group_prediction_list']['predictions'])
+    
+    all_PG_images = [None] * responselength
+    all_PG_images_Dict = {}
+    
+    for iterator in range(responselength):
+        print(iterator)
+        
+        product_group, pg_key_images  = init_pg_key_image_for_all_panes(response, iterator)
+
+        # Show the section of the main image onto the key.
+
+
+        all_PG_images[iterator] = pg_key_images.copy()
+        all_PG_images_Dict[product_group] = iterator
+        
+
+        
+    for i,n in enumerate(all_PG_images):
+        for k in tile_keys:
+
+            deck.set_key_image(k, all_PG_images[i][k])
+        
+        time.sleep(1)
+        
+    print('Length of all PG Images', len(all_PG_images))    
+    print('Length of all 0 PG Images', len(all_PG_images[0]))
+    return all_PG_images, all_PG_images_Dict
+
+def init_pg_key_image_for_all_panes(response, iterator):
+
+    product_group_info = get_product_group_info(response, iterator)
+    
+    product_group = response['product_group_prediction_list']['predictions'][iterator]['product_group']
+        
+    pg_image = create_partial_deck_sized_image(deck, key_spacing, product_group_info['image_file_name'])
+
+    for k in tile_0_keys_index:
+                
+        key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 0, 1)
+        
+        if k == 1:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k],
+                                                   label_text = product_group_info['label_text'],
+                                                   fill = product_group_info['fill'])  
+        elif k == 9:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k], 
+                                                   label_text = '',
+                                                   fill = 'white')
+
+    for k in tile_1_keys_index:
+        
+        key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 0, 4)
+        
+        if k == 4:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k],
+                                                   label_text = product_group_info['label_text'],
+                                                   fill = product_group_info['fill'])
+        elif k == 12:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k], 
+                                                   label_text = '',
+                                                   fill = 'white')
+
+    for k in tile_2_keys_index:
+        
+        key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 2, 1)
+        
+        if k == 17:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k],
+                                                   label_text = product_group_info['label_text'],
+                                                   fill = product_group_info['fill'])
+        elif k == 25:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k], 
+                                                   label_text = '',
+                                                   fill = 'black')
+
+    for k in tile_3_keys_index:
+        
+        key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 2, 4)
+        
+        if k == 20:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                key_images[k],
+                                                label_text = product_group_info['label_text'],
+                                                fill = product_group_info['fill'])
+        elif k == 28:
+            # Generate the custom key with the requested image and label.
+            key_images[k] = render_text_over_image(deck, 
+                                                   key_images[k], 
+                                                   label_text = '',
+                                                   fill = 'white')
+    
+    for k in tile_keys:
+        key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
+    return product_group, key_images 
 
 if __name__ == "__main__":
     streamdecks = DeviceManager().enumerate()
@@ -509,10 +775,10 @@ if __name__ == "__main__":
         key_spacing = (36, 36)
 
         # import of the BDE Status response for display of results
-        session_key = "piwZSNqplNO0K2kbBkQB"
+        session_key = "941071210275"
         
         x = requests.get('http://localhost:5100/bde/selection/evaluation/status/' + session_key)
-
+        
 
 
         print(x.status_code)
@@ -527,6 +793,8 @@ if __name__ == "__main__":
             response = x.json()
         #err
         
+
+
         #response_location = os.path.join(ASSETS_PATH, "response.json")
         #f = open(response_location)
         #response = json.load(f)
@@ -536,7 +804,6 @@ if __name__ == "__main__":
         
         print(result_length, "this is the result length")
         
-        err
         
         knwon_product_groups_num = 12
         tile_count = 4
@@ -572,10 +839,10 @@ if __name__ == "__main__":
         #FOURTH TILE
         tile_3_keys_index = [20,21,22,28,29,30]
         
-        
-        
         global tile_keys
         tile_keys = [1,2,3,9,10,11,4,5,6,12,13,14,17,18,19,25,26,27,20,21,22,28,29,30]
+        
+        PG_images, PG_dict = init_key_image_for_all_pgs(response)
         
         # Last button in the example application is the exit button.
         exit_key_index = deck.key_count() - 1
@@ -588,52 +855,68 @@ if __name__ == "__main__":
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Back_filled"))
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
             elif k == up_key_left_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Up_filled"))
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
             elif k == down_key_left_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck,
                                                  "{}.png".format("Down_filled"))
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
             elif k == call_to_action_key_left_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_text(deck,
                                                 label_text = 'PICK\nPRODUCT\nGROUP')
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
                 
             # RIGHT MENU
             if k == 7:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Forward_filled"))
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
             elif k == 15:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Up_filled"))
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
             elif k == 23:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
                                                  "{}.png".format("Down_filled"))
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
             elif k == 31:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_text(deck,label_text = 'EIBA')
-            
+                key_images[k] = PILHelper.to_native_format(deck, key_images[k])
+
+
+           
+                
             # OPTIONS PANE
                         
             if k in tile_0_keys_index:
-                key_images[k] = get_key_image_for_pane(k, response, display_order)
+                key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
                 
             elif k in tile_1_keys_index:
-                key_images[k] = get_key_image_for_pane(k, response, display_order)
+                key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
                 
             elif k in tile_2_keys_index:
-                key_images[k] = get_key_image_for_pane(k, response, display_order)
+                key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
                 
             elif k in tile_3_keys_index:
-                key_images[k] = get_key_image_for_pane(k, response, display_order)
-      
-            key_images[k] = PILHelper.to_native_format(deck, key_images[k])
-               
+                key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
+
             
         # Use a scoped-with on the deck to ensure we're the only thread
         # using it right now.
