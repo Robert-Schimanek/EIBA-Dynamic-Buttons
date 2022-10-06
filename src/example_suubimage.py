@@ -474,6 +474,28 @@ def change_page(change=0):
     
     return page
 
+def set_page_zero():
+    
+    global page
+    page = 0
+    
+    return page
+
+def key_updater(deck):
+    display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
+    print(display_order)
+    
+    for k in tile_keys:
+        # key_images[k] = get_key_image_for_pane(k, response, display_order)
+        key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
+
+        with deck:
+            #key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
+            deck.set_key_image(k, key_images[k])
+    
+    with deck:
+        deck.set_brightness(100)
+
 def update_key_image(deck, key, state):
     # Determine what icon and label to use on the generated key.
     key_style = get_key_style(deck, key, state)    
@@ -495,17 +517,18 @@ def update_key_image(deck, key, state):
             #display_order = get_random_display_order(4)
             change_page(-1)
             
-        display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
-        print(display_order)
+        key_updater(deck)
         
-        for k in tile_keys:
-            # key_images[k] = get_key_image_for_pane(k, response, display_order)
-            key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
-
-            with deck:
-                #key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
-                deck.set_key_image(k, key_images[k])
-              
+  #      display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
+#        print(display_order)
+  #      
+  #      for k in tile_keys:
+  #          key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
+#
+  #          with deck:
+   #             #key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
+   #             deck.set_key_image(k, key_images[k])
+ #             
     with deck:
         # Update requested key with the generated image.
         deck.set_key_image(key, image)
@@ -518,6 +541,30 @@ def key_change_callback(deck, key, state):
     
     # Update the key image based on the new key state.
     update_key_image(deck, key, state)
+        
+    #with deck:
+        # Update requested key with the generated image.
+        #deck.set_key_image(key, image)
+
+    # Use a scoped-with on the deck to ensure we're the only thread using it
+    # right now.
+#    with deck:
+        # Reset deck, clearing all button images.
+#        deck.reset()
+#
+#        # Close deck handle, terminating internal worker threads.
+#        deck.close()
+
+# Closes the StreamDeck device on key state change.
+def key_change_rest(deck, key, state):
+    # Print new key state
+    print('Stream deck is idle')
+    
+    deck.close()
+    #print("Deck {} Key {} = {}".format(deck.id(), key, state), flush=True)
+    
+    # Update the key image based on the new key state.
+    # update_key_image(deck, key, state)
         
     #with deck:
         # Update requested key with the generated image.
@@ -751,6 +798,46 @@ def init_pg_key_image_for_all_panes(response, iterator):
 
     return product_group, key_images 
 
+def get_PG_results(session_key):
+    x = requests.get('http://localhost:5100/bde/selection/evaluation/status/' + session_key)
+    return x
+
+def get_session_key():
+    # Check wether FrontEnd is actvie and get current session-key
+    x = requests.get('http://localhost:4444/sensors/active')
+    if x.json()["scanner"]["session_key"] != "":
+        #print( x.json()["scanner"]["session_key"])
+        response = x.json()     
+        
+    # get BDE status to selection from host
+    session_key = response["scanner"]["session_key"]
+    
+    return session_key
+
+def get_front_end_state():
+    # Check wether FrontEnd is actvie and get current session-key
+    x = requests.get('http://localhost:4444/sensors/active')
+    
+    front_end_active = False
+    try:
+        if x.json()["scanner"]["scanner_bool"]:
+            if x.json()["scanner"]["session_key"] != "":
+                #print( x.json()["scanner"]["session_key"])
+                response = x.json() 
+                front_end_active = True
+    except:
+        print("got no result")
+        
+    # get BDE status to selection from host
+    try:
+        session_key = response["scanner"]["session_key"]
+    
+    except:
+        session_key = ''
+    
+    return front_end_active, session_key
+    
+
 if __name__ == "__main__":
     streamdecks = DeviceManager().enumerate()
 
@@ -773,27 +860,46 @@ if __name__ == "__main__":
         # Approximate number of (non-visible) pixels between each key, so we can
         # take those into account when cutting up the image to show on the keys.
         key_spacing = (36, 36)
+            
+        # Start Init job to get product groups and names of oen    
+        url = 'http://localhost:5100/bde/selection/start'
+        myobj = {
+                "customer_number": "43016357",
+                "bar_code": "unknownbarcode",
+                "bar_code_scanable": "Y",
+                "box_exists": "Y",
+                "program": "IAM gesamt",
+                "session_key": "STREAMDECKINIT"
+                }
 
+        x = requests.post(url, json = myobj)
+        
+        # Wait for register
+        time.sleep(0.05)
+        
+        # Start Init job to get product groups and names of oen    
+        url = 'http://localhost:5100/bde/selection/evaluation/SSE'
+        myobj = {
+                  "core_mass": 330,
+                  "reman": "nullable string",
+                  "product_group_ID": 9999999999,
+                  "session_key": "STREAMDECKINIT"
+                }
+        x = requests.post(url, json = myobj)
+        
+        # Wait for register
+        time.sleep(1)
+        
         # import of the BDE Status response for display of results
-        session_key = "941071210275"
+        session_key = "STREAMDECKINIT"
         
-        x = requests.get('http://localhost:5100/bde/selection/evaluation/status/' + session_key)
-        
+        # get results from stream deck
+        x = get_PG_results(session_key)
 
-
-        print(x.status_code)
-        
-        
-        print(x.text)
-        
-        #print(x.json()["product_group_prediction_list"])
-        
+        # check wether results from stream deck contain pg info
         if x.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!':
             print( x.json()["product_group_prediction_list"]["predictions"])
-            response = x.json()
-        #err
-        
-
+            response = x.json()        
 
         #response_location = os.path.join(ASSETS_PATH, "response.json")
         #f = open(response_location)
@@ -802,10 +908,7 @@ if __name__ == "__main__":
 
         result_length = len(response['product_group_prediction_list']['predictions']) 
         
-        print(result_length, "this is the result length")
-        
-        
-        knwon_product_groups_num = 12
+        knwon_product_groups_num = result_length
         tile_count = 4
         page = 0
         
@@ -994,8 +1097,76 @@ if __name__ == "__main__":
                     deck.set_key_image(k, key_image)
                     
 
+        active = True
+        
+        with deck:
+           deck.set_brightness(0)
+           
         # Register callback function for when a key state changes.
         deck.set_key_callback(key_change_callback)
+        set_page_zero()
+        old_sessionkey = "veryoldsessionkey"
+        
+        while active:
+            
+            
+            front_end_active, session_key = get_front_end_state()
+            
+            if front_end_active == True:
+            
+                #session_key = get_session_key()
+                #print("Front End active", front_end_active)
+                
+                #print("Session key", session_key)
+            
+                if session_key != '':
+                    
+                    # get results from backend
+                    y = get_PG_results(session_key)
+                
+                    
+                    
+                    
+                    # check wether results from stream deck contain pg info
+                    if y.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!':
+                        #print( y.json()["product_group_prediction_list"]["predictions"])
+                        response = y.json()
+                        
+                        
+                        
+                        
+                            
+                        if old_sessionkey != session_key:
+                            print('page',page)
+                            print('old_sessionkey',old_sessionkey)
+                            print('old_sessionkey',session_key)
+                            print('page changed')
+                        
+                            set_page_zero()
+                            key_updater(deck)
+                            print('page changed')
+                            old_sessionkey = session_key
+                        
+
+                else:
+                    with deck:
+                        deck.set_brightness(0)
+                    time.sleep(1.050)
+                    
+                    print(page)
+                    if page != 0:                            
+                        set_page_zero()
+                        print(page)
+            
+            else:
+                with deck:
+                    deck.set_brightness(0)
+                time.sleep(0.050)
+                
+                print(page)
+                if page != 0:                            
+                    set_page_zero()
+                    print(page)
 
         # Wait until all application threads have terminated (for this example,
         # this is when all deck handles are closed).
