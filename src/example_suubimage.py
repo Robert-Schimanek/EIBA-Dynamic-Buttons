@@ -14,10 +14,13 @@
 
 import time
 import os
+import numpy
 import threading
 import json
 import requests
+from pickle import load
 
+import argparse
 
 from PIL import Image, ImageDraw, ImageOps, ImageFont
 from StreamDeck.DeviceManager import DeviceManager
@@ -26,6 +29,35 @@ from StreamDeck.ImageHelpers import PILHelper
 # Folder location of image assets used by this example.
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), "Assets")
 #typos = 'HalvarEng-Bd.ttf', 'HalvarEng-Bd.ttf'
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
+
+
+class Handler(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+       #message =  "threading.current_thread().getName()".encode()
+        self.wfile.write(json_message)
+        return
+    
+    def end_headers(self):
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET')
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
+        return super(Handler, self).end_headers()
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in a separate thread."""
+
+class MyServer(threading.Thread):
+    def run(self):
+        self.server = ThreadedHTTPServer(('localhost', 8000), Handler)
+        self.server.serve_forever()
+    def stop(self):
+        self.server.shutdown()
 
 # Generates an image that is correctly sized to fit across all keys of a given
 # StreamDeck.
@@ -423,25 +455,29 @@ def get_key_style(deck, key, state, font = "HalvarEng-Bd.ttf", action = "None"):
         name = "first_option"
         icon = "switch_blue"
         icon_path = "draw_switch_blue"
-        label = "Down" if state else "Down"
+        label = "Downed" if state else "Down"
+        action = "call_option_0"
     
     elif key in tile_1_keys_index:
         name = "second_option"
         icon = "switch_blue"
         icon_path = "draw_switch_blue"
-        label = "Down" if state else "Down"
+        label = "Downed" if state else "Down"
+        action = "call_option_1"
     
     elif key in tile_2_keys_index:
         name = "third_option"
         icon = "switch_blue"
         icon_path = "draw_switch_blue"
-        label = "Down" if state else "Down"
+        label = "Downed" if state else "Down"
+        action = "call_option_2"
         
     elif key in tile_3_keys_index:
         name = "fourth_option"
         icon = "switch_blue"
         icon_path = "draw_switch_blue"
-        label = "Down" if state else "Down"
+        label = "Downed" if state else "Down"
+        action = "call_option_3"
     
     elif key == exit_key_index:
         name = "exit"
@@ -474,6 +510,15 @@ def change_page(change=0):
     
     return page
 
+def messagetosent(string):
+    
+    global json_message
+    message = {'product_group' : string }
+#   message = string.encode()
+    json_message = json.dumps(message).encode()
+    
+
+
 def set_page_zero():
     
     global page
@@ -500,38 +545,106 @@ def update_key_image(deck, key, state):
     # Determine what icon and label to use on the generated key.
     key_style = get_key_style(deck, key, state)    
     
+    print(key_style['action'])
     
-    # Generate the custom key with the requested image and label.
-    image = render_key_image(deck, key_style["icon"], key_style["font"], key_style["label"])
-    image = PILHelper.to_native_format(deck, image)
+    if (key_style['action'] == 'call_option_0'):
+        print('send option left up')
+ 
+        #get Name of PG
+        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+
+        messagetosent( str(
+            NametoPGIDDict[PG_dict_inv[display_order[0]]])
+            )
+        s = MyServer()
+        
+        start_and_stop_server(s)
+        
+        del s
+        
+        
+    elif (key_style['action'] == 'call_option_1'):
+        print('send option right up')
+        
+        #get Name of PG
+        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+
+        messagetosent( str(
+            NametoPGIDDict[PG_dict_inv[display_order[1]]])
+            )
+        s = MyServer()
+        
+        start_and_stop_server(s)
+        
+        del s
+
+    elif (key_style['action'] == 'call_option_2'):
+        print('send option left down')
+        
+        #get Name of PG
+        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+
+        messagetosent( str(
+            NametoPGIDDict[PG_dict_inv[display_order[2]]])
+            )
+        s = MyServer()
+        
+        start_and_stop_server(s)
+        
+        del s
+
+
+    elif (key_style['action'] == 'call_option_3'):
+        print('send option right down')
+        
+        #get Name of PG
+        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+
+        messagetosent( str(
+            NametoPGIDDict[PG_dict_inv[display_order[3]]])
+            )
+        s = MyServer()
+        
+        start_and_stop_server(s)
+        
+        del s
+
+    else:
+    
+        # Generate the custom key with the requested image and label.
+        image = render_key_image(deck, key_style["icon"], key_style["font"], key_style["label"])
+        image = PILHelper.to_native_format(deck, image)
     
     # Use a scoped-with on the deck to ensure we're the only thread using it
     # right now.
     
-    if (key_style['action'] == 'scroll_down') or (key_style['action'] == 'scroll_up'):    
-        if key_style['action'] == 'scroll_down':
-            #display_order = get_random_display_order(4)    
-            change_page(1)
     
-        elif key_style['action'] == 'scroll_up':
-            #display_order = get_random_display_order(4)
-            change_page(-1)
-            
-        key_updater(deck)
+        if (key_style['action'] == 'scroll_down') or (key_style['action'] == 'scroll_up'):    
+            if key_style['action'] == 'scroll_down':
+                #display_order = get_random_display_order(4)    
+                change_page(1)
         
-  #      display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
-#        print(display_order)
-  #      
-  #      for k in tile_keys:
-  #          key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
-#
-  #          with deck:
-   #             #key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
-   #             deck.set_key_image(k, key_images[k])
- #             
-    with deck:
-        # Update requested key with the generated image.
-        deck.set_key_image(key, image)
+            elif key_style['action'] == 'scroll_up':
+                #display_order = get_random_display_order(4)
+                change_page(-1)
+                
+            key_updater(deck)
+        
+    
+    
+      #      display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
+    #        print(display_order)
+      #      
+      #      for k in tile_keys:
+      #          key_images[k] = get_key_image_for_pane_new(k, response, display_order, PG_images, PG_dict)
+    #
+      #          with deck:
+       #             #key_images[k] = PILHelper.to_native_format(deck, key_images[k])    
+       #             deck.set_key_image(k, key_images[k])
+     #             
+        with deck:
+            # Update requested key with the generated image.
+            deck.set_key_image(key, image)
 
 
 # Closes the StreamDeck device on key state change.
@@ -837,8 +950,35 @@ def get_front_end_state():
     
     return front_end_active, session_key
     
+def start_and_stop_server(s):
+   
+    
+    s.start()
+    print('thread alive:', s.is_alive())  # True
+    time.sleep(0.5)
+    s.stop()
+    print('thread alive:', s.is_alive())  # False
+    deck.set_brightness(0)
+    
 
 if __name__ == "__main__":
+    
+    path = "PG_IDtoLabelDict.pkl"
+    with open(path, "rb") as f:
+        PG_IDtoLabelDict = load(f)
+        
+    path = "PG_LabeltoIDDict.pkl"
+    with open(path, "rb") as f:
+        PG_LabeltoIDDict = load(f)
+        
+    path = "PGIDtoNamewSpaceDict.pkl"
+    with open(path, "rb") as f:
+        PGIDtoNamewSpaceDict = load(f)
+        
+
+    NametoPGIDDict = {v: k for k, v in PGIDtoNamewSpaceDict.items()}
+    
+
     streamdecks = DeviceManager().enumerate()
 
     print("Found {} Stream Deck(s).\n".format(len(streamdecks)))
@@ -1002,9 +1142,7 @@ if __name__ == "__main__":
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_text(deck,label_text = 'EIBA')
                 key_images[k] = PILHelper.to_native_format(deck, key_images[k])
-
-
-           
+        
                 
             # OPTIONS PANE
                         
@@ -1108,8 +1246,7 @@ if __name__ == "__main__":
         old_sessionkey = "veryoldsessionkey"
         
         while active:
-            
-            
+                       
             front_end_active, session_key = get_front_end_state()
             
             if front_end_active == True:
@@ -1123,18 +1260,12 @@ if __name__ == "__main__":
                     
                     # get results from backend
                     y = get_PG_results(session_key)
-                
-                    
-                    
-                    
+                                          
                     # check wether results from stream deck contain pg info
                     if y.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!':
                         #print( y.json()["product_group_prediction_list"]["predictions"])
                         response = y.json()
-                        
-                        
-                        
-                        
+                                            
                             
                         if old_sessionkey != session_key:
                             print('page',page)
