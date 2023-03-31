@@ -89,7 +89,10 @@ def to_native_format(deck, image):
     from PIL import Image
 
     image_format = deck.key_image_format()
-
+    
+    #print(image_format, "image_format in PIL Helper")
+    #print(image.size, "image size in image_format")
+    
     if image_format['rotation']:
         image = image.rotate(image_format['rotation'])
 
@@ -101,6 +104,13 @@ def to_native_format(deck, image):
 
     if image.size != image_format['size']:
         image.thumbnail(image_format['size'])
+
+    #image_format['size'] = (200, 200)
+    #image = image.resize((96,96))
+    
+    #print(image.size)
+    
+    #print(image_format, "image_format in PIL Helper")
 
     # We want a compressed image in a given codec, convert.
     compressed_image = io.BytesIO()

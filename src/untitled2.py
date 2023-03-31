@@ -148,7 +148,7 @@ def render_key_image(deck,
     icon_filename = os.path.join(ASSETS_PATH, icon_filename)
 
     icon = Image.open(icon_filename)
-    image = PILHelper.create_scaled_image(deck, icon, margins=[0, 0, 0, 0])
+    image = PILHelper.create_scaled_image(deck, icon, margins=[0,0, 0,0])
 
 
     return image
@@ -714,7 +714,7 @@ def get_key_image_for_pane(k, response, display_order_loc):
         image_0 = create_partial_deck_sized_image(deck, key_spacing, product_group_info['image_file_name'])
         key_image = crop_key_image_from_deck_sized_image(deck, image_0, key_spacing, k, 0, 1)
         
-        if k == 1:
+        if k == 0:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                    key_image,
@@ -727,13 +727,13 @@ def get_key_image_for_pane(k, response, display_order_loc):
         image_1 = create_partial_deck_sized_image(deck, key_spacing, product_group_info['image_file_name'])
         key_image = crop_key_image_from_deck_sized_image(deck, image_1, key_spacing, k, 0, 4)
         
-        if k == 4:
+        if k == 3:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                    key_image,
                                                    label_text = product_group_info['label_text'],
                                                    fill = product_group_info['fill'])
-        elif k == 12:
+        elif k == 11:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                    key_image, 
@@ -747,13 +747,13 @@ def get_key_image_for_pane(k, response, display_order_loc):
         image_2 = create_partial_deck_sized_image(deck, key_spacing, product_group_info['image_file_name'])
         key_image = crop_key_image_from_deck_sized_image(deck, image_2, key_spacing, k, 2, 1)
         
-        if k == 17:
+        if k == 16:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                    key_image,
                                                    label_text = product_group_info['label_text'],
                                                    fill = product_group_info['fill'])
-        elif k == 25:
+        elif k == 24:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                    key_image, 
@@ -765,13 +765,13 @@ def get_key_image_for_pane(k, response, display_order_loc):
         image_3 = create_partial_deck_sized_image(deck, key_spacing, product_group_info['image_file_name'])
         key_image = crop_key_image_from_deck_sized_image(deck, image_3, key_spacing, k, 2, 4)
         
-        if k == 20:
+        if k == 19:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                 key_image,
                                                 label_text = product_group_info['label_text'],
                                                 fill = product_group_info['fill'])
-        elif k == 28:
+        elif k == 27:
             # Generate the custom key with the requested image and label.
             key_image = render_text_over_image(deck, 
                                                    key_image, 
@@ -811,9 +811,9 @@ def init_key_image_for_all_pgs(response):
         
         product_group, pg_key_images  = init_pg_key_image_for_all_panes(response, iterator)
 
+        print(pg_key_images)
+        err
         # Show the section of the main image onto the key.
-
-
         all_PG_images[iterator] = pg_key_images.copy()
         all_PG_images_Dict[product_group] = iterator
         
@@ -821,7 +821,6 @@ def init_key_image_for_all_pgs(response):
         
     for i,n in enumerate(all_PG_images):
         for k in tile_keys:
-
             deck.set_key_image(k, all_PG_images[i][k])
         
         time.sleep(1)
@@ -842,13 +841,13 @@ def init_pg_key_image_for_all_panes(response, iterator):
                 
         key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 0, 1)
         
-        if k == 1:
+        if k == 0:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k],
                                                    label_text = product_group_info['label_text'],
                                                    fill = product_group_info['fill'])  
-        elif k == 9:
+        elif k == 8:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k], 
@@ -859,13 +858,13 @@ def init_pg_key_image_for_all_panes(response, iterator):
         
         key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 0, 4)
         
-        if k == 4:
+        if k == 3:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k],
                                                    label_text = product_group_info['label_text'],
                                                    fill = product_group_info['fill'])
-        elif k == 12:
+        elif k == 11:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k], 
@@ -876,13 +875,13 @@ def init_pg_key_image_for_all_panes(response, iterator):
         
         key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 2, 1)
         
-        if k == 17:
+        if k == 16:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k],
                                                    label_text = product_group_info['label_text'],
                                                    fill = product_group_info['fill'])
-        elif k == 25:
+        elif k == 24:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k], 
@@ -893,13 +892,13 @@ def init_pg_key_image_for_all_panes(response, iterator):
         
         key_images[k] = crop_key_image_from_deck_sized_image(deck, pg_image, key_spacing, k, 2, 4)
         
-        if k == 20:
+        if k == 19:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                 key_images[k],
                                                 label_text = product_group_info['label_text'],
                                                 fill = product_group_info['fill'])
-        elif k == 28:
+        elif k == 27:
             # Generate the custom key with the requested image and label.
             key_images[k] = render_text_over_image(deck, 
                                                    key_images[k], 
@@ -999,8 +998,8 @@ if __name__ == "__main__":
 
         # Approximate number of (non-visible) pixels between each key, so we can
         # take those into account when cutting up the image to show on the keys.
-        key_spacing = (36, 36)
-        #key_spacing = (0, 0)
+        #key_spacing = (36, 36)
+        key_spacing = (0, 0)
             
         # Start Init job to get product groups and names of oen    
         url = 'http://localhost:5100/bde/selection/start'
@@ -1063,33 +1062,34 @@ if __name__ == "__main__":
         #LEFT MENU
         
         #First button in the application is the back button
-        back_key_index = 0
+        #back_key_index = 0
+        back_key_index = 6
         #8th button in the application is the up button left
-        up_key_left_index = 8 
+        up_key_left_index = 14 
         #16th button in the application is the down button left
-        down_key_left_index = 16 
+        down_key_left_index = 22 
         #16th button in the application is the up button left
-        call_to_action_key_left_index = 24 
+        call_to_action_key_left_index = 30 
         
         #FIRST TILE
-        tile_0_keys_index = [1,2,3,9,10,11]
+        tile_0_keys_index = [0,1,2,8,9,10]
         
         #SECOND TILE
-        tile_1_keys_index = [4,5,6,12,13,14]
+        tile_1_keys_index = [3,4,5,11,12,13]
         
         #THIRD TILE
-        tile_2_keys_index = [17,18,19,25,26,27]
+        tile_2_keys_index = [16,17,18,24,25,26]
 
         #FOURTH TILE
-        tile_3_keys_index = [20,21,22,28,29,30]
+        tile_3_keys_index = [19,20,21,27,28,29]
         
         global tile_keys
-        tile_keys = [1,2,3,9,10,11,4,5,6,12,13,14,17,18,19,25,26,27,20,21,22,28,29,30]
+        tile_keys = [0,1,2,8,9,10,3,4,5,11,12,13,16,17,18,24,25,26,19,20,21,27,28,29]
         
         PG_images, PG_dict = init_key_image_for_all_pgs(response)
         
         # Last button in the example application is the exit button.
-        exit_key_index = deck.key_count() - 1
+        exit_key_index = 31
         
         
         for k in key_count:
@@ -1167,28 +1167,28 @@ if __name__ == "__main__":
             for k in key_count:
                 
                 # LEFT MENU
-                if k == 0:
+                if k == 6:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
-                if k == 8:
+                if k == 14:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)                
-                if k == 16:
+                if k == 22:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
-                if k == 24:
+                if k == 30:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
                 
-                # LEFT MENU
+                # RIGHT MENU
                 if k == 7:
                     key_image = key_images[k]
                 
@@ -1211,25 +1211,25 @@ if __name__ == "__main__":
                     deck.set_key_image(k, key_image)
                 
                 
-                if k == 1 or k == 2 or k == 3 or k == 9 or k == 10 or k == 11:
+                if k == 0 or k == 1 or k == 2 or k == 8 or k == 9 or k == 10:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
                     
-                if k == 4 or k == 5 or k == 6 or k == 12 or k == 13 or k == 14:
+                if k == 3 or k == 4 or k == 5 or k == 11 or k == 12 or k == 13:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
 
-                if k == 17 or k == 18 or k == 19 or k == 25 or k == 26 or k == 27:
+                if k == 16 or k == 17 or k == 18 or k == 24 or k == 25 or k == 26:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
                     
-                if k == 20 or k == 21 or k == 22 or k == 28 or k == 29 or k == 30:
+                if k == 19 or k == 20 or k == 21 or k == 27 or k == 28 or k == 29:
                     key_image = key_images[k]
                 
                     # Show the section of the main image onto the key.

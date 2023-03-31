@@ -192,6 +192,9 @@ class StreamDeckXL(StreamDeck):
 
             payload = bytes(header) + image[bytes_sent:bytes_sent + this_length]
             padding = bytearray(self.IMAGE_REPORT_LENGTH - len(payload))
+            #print(padding)
+            print(self.IMAGE_REPORT_LENGTH, "Image Report Length")
+            print(len(payload), "Length of Payload")
             self.device.write(payload + padding)
 
             bytes_remaining = bytes_remaining - this_length
