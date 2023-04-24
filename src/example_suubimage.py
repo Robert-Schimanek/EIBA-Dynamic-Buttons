@@ -53,6 +53,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
 class MyServer(threading.Thread):
+    
     def run(self):
         self.server = ThreadedHTTPServer(('localhost', 8000), Handler)
         self.server.serve_forever()
@@ -137,7 +138,7 @@ def crop_key_image_from_deck_sized_image(deck,
 # Generates a custom tile with run-time generated text and custom image via the
 # PIL module.
 def render_key_image(deck,
-                     icon_filename = "{}.png".format("Exit"),
+                     icon_filename = "{}.png".format("EIBA_black"),
                      font_filename = 'HalvarEng-Bd.ttf', 
                      label_text = 'DEFAULT'
                      ):
@@ -231,6 +232,22 @@ def get_product_group_info(response, iterator = 0, product_group = 'Alternator')
     elif product_group == 'Starter': #'Starter':
         image_file_name = "Starter_StreamDeck_XL.png"
         label_text = "STARTER"
+        fill = 'black'
+        
+        # ID
+    elif product_group == 'Hot-filmAir-mass-meter': #'CommonRailInjector':
+        image_file_name = "HotFilmAirMassMeter_StreamDeck_XL.png"
+        label_text = "HOT FILM\nAIR MASS\nMETER"
+        fill = 'black'
+        
+    elif product_group == 'Air-flowmeter': #'CommonRailInjector':
+        image_file_name = "HotFilmAirMassMeter_StreamDeck_XL.png"
+        label_text = "AIR\nFLOW\nMETER"
+        fill = 'black'
+        
+    elif product_group == 'EHB': #'CommonRailInjector':
+        image_file_name = "EHB_StreamDeck_XL.png"
+        label_text = "EHB"
         fill = 'black'
     
     # ID
@@ -425,7 +442,7 @@ def get_key_style(deck, key, state, font = "HalvarEng-Bd.ttf", action = "None"):
 
     if key == back_key_index:
         name = "back"
-        icon = "{}.png".format("Back_filled")
+        icon = "{}.png".format("EIBA_black")
         icon_path = os.path.join(ASSETS_PATH, icon)
         label = "Bye" if state else "Back"
         
@@ -446,10 +463,33 @@ def get_key_style(deck, key, state, font = "HalvarEng-Bd.ttf", action = "None"):
             action = "scroll_down"
     
     elif key == call_to_action_key_left_index:
-        name = "call_to_action"
-        icon = "{}.png".format("Alternator_real_squared")
+        name = "emoji"                                                      
+        icon = "{}.png".format("Pressed" if state else "EIBA_black")
         icon_path = os.path.join(ASSETS_PATH, icon)
-        label = "Down" if state else "Down"
+        font = "HalvarEng-Bd.ttf"
+        label = "Outch!" if state else "Key {}".format(key)
+        
+    elif key == forward_key_index:
+        name = "back"
+        icon = "{}.png".format("Forward_filled")
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Outch!" if state else "Forward"
+        
+    elif key == up_key_right_index:
+        name = "up_right"
+        icon = "{}.png".format("Up_filled")
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Uped" if state else "Up"
+        if state:
+            action = "scroll_up" 
+    
+    elif key == down_key_right_index:
+        name = "down_right"
+        icon = "{}.png".format("Down_filled")
+        icon_path = os.path.join(ASSETS_PATH, icon)
+        label = "Downed" if state else "Down"
+        if state:
+            action = "scroll_down"
         
     elif key in tile_0_keys_index:
         name = "first_option"
@@ -481,13 +521,13 @@ def get_key_style(deck, key, state, font = "HalvarEng-Bd.ttf", action = "None"):
     
     elif key == exit_key_index:
         name = "exit"
-        icon = "{}.png".format("Exit")
+        icon = "{}.png".format("Hamster_black" if state else "Hamster_black")
         icon_path = os.path.join(ASSETS_PATH, icon)
         label = "Bye" if state else "Exit"
         
     else:
         name = "emoji"                                                      
-        icon = "{}.png".format("Pressed" if state else "Released")
+        icon = "{}.png".format("Pressed" if state else "EIBA_black")
         icon_path = os.path.join(ASSETS_PATH, icon)
         font = "HalvarEng-Bd.ttf"
         label = "Outch!" if state else "Key {}".format(key)
@@ -507,17 +547,28 @@ def change_page(change=0):
     
     if page < 0:
         page = 0
+    if page > 3:
+        page = 3
     
     return page
 
 def messagetosent(string):
     
     global json_message
-    message = {'product_group' : string }
+    message = {"product_group": string }
+    print(message)
 #   message = string.encode()
     json_message = json.dumps(message).encode()
     
-
+    #print(json_message)
+    
+def emptymessage():
+    
+    global json_message
+    message = {}
+    print(message)
+#   message = string.encode()
+    json_message = 0
 
 def set_page_zero():
     
@@ -528,7 +579,9 @@ def set_page_zero():
 
 def key_updater(deck):
     display_order = [x + page*4 for x in order]   #display_order = change_order(-4)
-    print(display_order)
+    #("key_updater:display_order", display_order)
+    
+    
     
     for k in tile_keys:
         # key_images[k] = get_key_image_for_pane(k, response, display_order)
@@ -546,68 +599,118 @@ def update_key_image(deck, key, state):
     key_style = get_key_style(deck, key, state)    
     
     print(key_style['action'])
+    print(key_style['label'])
+    print("update_key_image: get_key_style(deck, key, state)    ")
+    #emptymessage()
+    
+    ordering = [x + (page * 4) for x in display_order]
     
     if (key_style['action'] == 'call_option_0'):
-        print('send option left up')
- 
-        #get Name of PG
-        PG_dict_inv = {v: k for k, v in PG_dict.items()}
-
-        messagetosent( str(
-            NametoPGIDDict[PG_dict_inv[display_order[0]]])
-            )
-        s = MyServer()
+        if (key_style['label'] == 'Downed'):
+            print('send option left up')
+     
+            #get Name of PG
+            PG_dict_inv = {v: k for k, v in PG_dict.items()}
+            print(PG_dict_inv)
+            print("page", page)
+            print("display_order", display_order)
+            print( [x + (page * 4) for x in display_order] )
+            print("display_order[0]", display_order[0])
+            
+            
+            messagetosent( str(
+                NametoPGIDDict[PG_dict_inv[ordering[0]]])
+                )
+            
+            s = MyServer()
+            
+            start_and_stop_server(s)
+            
+            del s
+            
+        messagetosent( "False" )
         
-        start_and_stop_server(s)
-        
-        del s
         
         
     elif (key_style['action'] == 'call_option_1'):
-        print('send option right up')
-        
-        #get Name of PG
-        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+        if (key_style['label'] == 'Downed'):
+            print('send option right up')
+            
+            #get Name of PG
+            PG_dict_inv = {v: k for k, v in PG_dict.items()}
+            print(PG_dict_inv)
+            print(PG_dict_inv)
+            print("page", page)
+            print( [x + 4 for x in display_order] )
 
-        messagetosent( str(
-            NametoPGIDDict[PG_dict_inv[display_order[1]]])
-            )
-        s = MyServer()
-        
-        start_and_stop_server(s)
-        
-        del s
+
+            print("display_order", display_order)
+            print("display_order[0]", display_order[1])
+    
+            messagetosent( str(
+                NametoPGIDDict[PG_dict_inv[ordering[1]]])
+                )
+            s = MyServer()
+            
+            start_and_stop_server(s)
+            
+            del s
+            
+        messagetosent( "False" )
+
 
     elif (key_style['action'] == 'call_option_2'):
-        print('send option left down')
-        
-        #get Name of PG
-        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+        if (key_style['label'] == 'Downed'):
+            print('send option left down')
+            
+            #get Name of PG
+            PG_dict_inv = {v: k for k, v in PG_dict.items()}
+            print(PG_dict_inv)
+            print("page", page)
+            print( [x + 4 for x in display_order] )
 
-        messagetosent( str(
-            NametoPGIDDict[PG_dict_inv[display_order[2]]])
-            )
-        s = MyServer()
-        
-        start_and_stop_server(s)
-        
-        del s
+
+            print("display_order", display_order)
+            print("display_order[0]", display_order[2])
+            messagetosent( str(
+                NametoPGIDDict[PG_dict_inv[ordering[2]]])
+                )
+            s = MyServer()
+            
+            start_and_stop_server(s)
+            
+            del s
+            
+        messagetosent( "False" )
+
 
 
     elif (key_style['action'] == 'call_option_3'):
-        print('send option right down')
-        
-        #get Name of PG
-        PG_dict_inv = {v: k for k, v in PG_dict.items()}
+        if (key_style['label'] == 'Downed'):
+            print('send option right down')
+            
+            #get Name of PG
+            PG_dict_inv = {v: k for k, v in PG_dict.items()}
+            print(PG_dict_inv)
+            print("page", page)
+            print( [x + 4 for x in display_order] )
 
-        messagetosent( str(
-            NametoPGIDDict[PG_dict_inv[display_order[3]]])
-            )
-        s = MyServer()
-        
-        start_and_stop_server(s)
-        
-        del s
+
+            print("display_order", display_order)
+            print("display_order[0]", display_order[3])
+    
+    
+            messagetosent( str(
+                NametoPGIDDict[PG_dict_inv[ordering[3]]])
+                )
+            s = MyServer()
+            
+            start_and_stop_server(s)
+            
+            del s
+            
+        messagetosent( "False" )
+
 
     else:
     
@@ -703,6 +806,8 @@ def get_random_display_order(end = 3, start = 0):
     # [0, 3, 1, 2]
     global order
     order = lr
+    
+    print("getrandomdisplayorder: order", order)
 
     return lr
 
@@ -781,8 +886,9 @@ def get_key_image_for_pane(k, response, display_order_loc):
 
     return key_image
 
-def get_key_image_for_pane_new(k, response, display_order_loc, PG_key_images, PG_iterator_dict):
-    
+def get_key_image_for_pane_new(k, response, display_order_loc, PG_key_images, PG_dict):
+    #print(PG_dict)
+    #print("get_key_image_for_pane_new", response['product_group_prediction_list'])
     if k in tile_0_keys_index:
         product_group = response['product_group_prediction_list']['predictions'][display_order_loc[0]]['product_group']
          
@@ -795,12 +901,17 @@ def get_key_image_for_pane_new(k, response, display_order_loc, PG_key_images, PG
     elif k in tile_3_keys_index:   
         product_group = response['product_group_prediction_list']['predictions'][display_order_loc[3]]['product_group']
 
-    key_image = PG_key_images[PG_iterator_dict[product_group]][k]
-           
+    #print(product_group)
+
+
+    key_image = PG_key_images[PG_dict_init[product_group]][k]
+    
+    #print(key_image)
+    
     return key_image
 
 def init_key_image_for_all_pgs(response):
-    
+    print("init_key_image_for_all_pgs", response['product_group_prediction_list']['predictions'])
     responselength = len(response['product_group_prediction_list']['predictions'])
     
     all_PG_images = [None] * responselength
@@ -830,9 +941,26 @@ def init_key_image_for_all_pgs(response):
     print('Length of all 0 PG Images', len(all_PG_images[0]))
     return all_PG_images, all_PG_images_Dict
 
+def get_PG_dict(response):
+    #print("init_key_image_for_all_pgs", response['product_group_prediction_list']['predictions'])
+    responselength = len(response['product_group_prediction_list']['predictions'])
+    
+    all_PG_images_Dict = {}
+    
+    for iterator in range(responselength):
+        print(iterator)
+        
+        product_group = response['product_group_prediction_list']['predictions'][iterator]['product_group']
+
+        all_PG_images_Dict[product_group] = iterator
+
+    return all_PG_images_Dict
+
 def init_pg_key_image_for_all_panes(response, iterator):
 
     product_group_info = get_product_group_info(response, iterator)
+    
+    #print("init_pg_key_image_for_all_panes", response['product_group_prediction_list']['predictions'])
     
     product_group = response['product_group_prediction_list']['predictions'][iterator]['product_group']
         
@@ -915,11 +1043,24 @@ def get_PG_results(session_key):
     x = requests.get('http://localhost:5100/bde/selection/evaluation/status/' + session_key)
     return x
 
+def get_streamdeck_call():
+    x = requests.get('http://localhost:4444/sensors/active')
+    return x
+
+def deactivate_stream_deck(session_key):
+        # Start Init job to get product groups and names of oen    
+    url = 'http://http://localhost:4444/sensors/streamdeck'
+    myobj = {
+              "activate_scanner": "N",
+              "session_key": session_key
+            }
+    x = requests.post(url, json = myobj)
+
 def get_session_key():
     # Check wether FrontEnd is actvie and get current session-key
     x = requests.get('http://localhost:4444/sensors/active')
-    if x.json()["scanner"]["session_key"] != "":
-        #print( x.json()["scanner"]["session_key"])
+    if x.json()["streamdeck"]["session_key"] != "":
+        #print( x.json()["streamdeck"]["session_key"])
         response = x.json()     
         
     # get BDE status to selection from host
@@ -933,11 +1074,16 @@ def get_front_end_state():
     
     front_end_active = False
     try:
-        if x.json()["scanner"]["scanner_bool"]:
-            if x.json()["scanner"]["session_key"] != "":
-                #print( x.json()["scanner"]["session_key"])
-                response = x.json() 
-                front_end_active = True
+        #if x.json()["streamdeck"]["streamdeck_bool"] == True:
+        if x.json()["streamdeck"]["session_key"] != "":
+            #print( x.json()["scanner"]["session_key"])
+            response = x.json() 
+            front_end_active = True
+        #elif x.json()["streamdeck"]["streamdeck_bool"] == False:
+        #    if x.json()["streamdeck"]["session_key"] != "":
+         #       #print( x.json()["scanner"]["session_key"])
+         #       response = x.json() 
+         #       front_end_active = True
     except:
         print("got no result")
         
@@ -955,10 +1101,21 @@ def start_and_stop_server(s):
     
     s.start()
     print('thread alive:', s.is_alive())  # True
-    time.sleep(0.5)
+    time.sleep(0.1)
+    
+    try:
+        deck.set_brightness(0)
+    except:
+        print("Error reducing brightness")
+    
+    time.sleep(0.4)
     s.stop()
     print('thread alive:', s.is_alive())  # False
-    deck.set_brightness(0)
+    #emptymessage()
+    
+    
+
+    
     
 
 if __name__ == "__main__":
@@ -1006,6 +1163,7 @@ if __name__ == "__main__":
         url = 'http://localhost:5100/bde/selection/start'
         myobj = {
                 "customer_number": "43016357",
+                "customer_delv_no": "BXFR27558",
                 "bar_code": "unknownbarcode",
                 "bar_code_scanable": "Y",
                 "box_exists": "Y",
@@ -1046,7 +1204,7 @@ if __name__ == "__main__":
         #f = open(response_location)
         #response = json.load(f)
         
-
+        print(response)
         result_length = len(response['product_group_prediction_list']['predictions']) 
         
         knwon_product_groups_num = result_length
@@ -1071,6 +1229,17 @@ if __name__ == "__main__":
         #16th button in the application is the up button left
         call_to_action_key_left_index = 24 
         
+        #RIGHT MENU
+        
+        #First button in the application is the back button
+        forward_key_index = 7
+        #8th button in the application is the up button left
+        up_key_right_index = 15 
+        #16th button in the application is the down button left
+        down_key_right_index = 23 
+        #16th button in the application is the up button left
+        exit_key_index = 31 
+        
         #FIRST TILE
         tile_0_keys_index = [1,2,3,9,10,11]
         
@@ -1088,6 +1257,8 @@ if __name__ == "__main__":
         
         PG_images, PG_dict = init_key_image_for_all_pgs(response)
         
+        PG_dict_init = PG_dict.copy()
+        
         # Last button in the example application is the exit button.
         exit_key_index = deck.key_count() - 1
         
@@ -1098,7 +1269,7 @@ if __name__ == "__main__":
             if k == back_key_index:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
-                                                 "{}.png".format("Back_filled"))
+                                                 "{}.png".format("EIBA_black"))
                 key_images[k] = PILHelper.to_native_format(deck, key_images[k])
 
             elif k == up_key_left_index:
@@ -1124,7 +1295,7 @@ if __name__ == "__main__":
             if k == 7:
                 # Generate the custom key with the requested image and label.
                 key_images[k] = render_key_image(deck, 
-                                                 "{}.png".format("Forward_filled"))
+                                                 "{}.png".format("TUBERLIN_black"))
                 key_images[k] = PILHelper.to_native_format(deck, key_images[k])
 
             elif k == 15:
@@ -1141,7 +1312,8 @@ if __name__ == "__main__":
 
             elif k == 31:
                 # Generate the custom key with the requested image and label.
-                key_images[k] = render_key_text(deck,label_text = 'EIBA')
+                key_images[k] = render_key_image(deck, 
+                                 "{}.png".format("Hamster_black"))
                 key_images[k] = PILHelper.to_native_format(deck, key_images[k])
         
                 
@@ -1188,7 +1360,7 @@ if __name__ == "__main__":
                     # Show the section of the main image onto the key.
                     deck.set_key_image(k, key_image)
                 
-                # LEFT MENU
+                # RIGHT MENU
                 if k == 7:
                     key_image = key_images[k]
                 
@@ -1245,6 +1417,7 @@ if __name__ == "__main__":
         deck.set_key_callback(key_change_callback)
         set_page_zero()
         old_sessionkey = "veryoldsessionkey"
+        temp_key = "intermediatekey"
         
         while active:
                        
@@ -1252,7 +1425,7 @@ if __name__ == "__main__":
             
             if front_end_active == True:
             
-                #session_key = get_session_key()
+                
                 #print("Front End active", front_end_active)
                 
                 #print("Session key", session_key)
@@ -1260,15 +1433,28 @@ if __name__ == "__main__":
                 if session_key != '':
                     
                     # get results from backend
+                    
+                    #session_key = get_session_key()
+                    #print(session_key)
                     y = get_PG_results(session_key)
-                                          
+                    stream_deck_call = get_streamdeck_call()
+                    
+                    #print(y.json()["product_group_prediction_list"]["status"])
+                    
                     # check wether results from stream deck contain pg info
-                    if y.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!':
-                        #print( y.json()["product_group_prediction_list"]["predictions"])
+                    if (y.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!') & (stream_deck_call.json()["streamdeck"]["streamdeck_bool"] == False):
+                        #print("streamdeck""streamdeck_bool False")
                         response = y.json()
+                        
+                        #print(response)
                                             
-                            
                         if old_sessionkey != session_key:
+                            try:
+                                PG_dict = get_PG_dict(response)
+                            except:
+                                print("error")
+                                
+                            print("streamdeck""streamdeck_bool False")
                             print('page',page)
                             print('old_sessionkey',old_sessionkey)
                             print('old_sessionkey',session_key)
@@ -1276,16 +1462,41 @@ if __name__ == "__main__":
                         
                             set_page_zero()
                             key_updater(deck)
-                            print('page changed')
+                            print('page changed to zero page')
                             old_sessionkey = session_key
+                            
+                    elif (y.json()["product_group_prediction_list"]["status"] == 'Product group prediction completed!') & stream_deck_call.json()["streamdeck"]["streamdeck_bool"] == True:
+                        response = y.json()
                         
+                        if temp_key != session_key:
+                            try:
+                                PG_dict = get_PG_dict(response)
+                            except:
+                                print("error")
 
+                            print("streamdeck""streamdeck_bool True")
+                            print('page',page)
+                            print('old_sessionkey',old_sessionkey)
+                            print('old_sessionkey',session_key)
+                            print('page changed to zero page')
+                            set_page_zero()
+                            key_updater(deck)
+                            
+                            old_sessionkey = session_key
+                            temp_key = session_key
+
+                    else:
+                        #set_page_zero()
+                        temp_key = "free"
+                        
+                        
                 else:
                     with deck:
                         deck.set_brightness(0)
                     time.sleep(1.050)
                     
                     print(page)
+                    
                     if page != 0:                            
                         set_page_zero()
                         print(page)
